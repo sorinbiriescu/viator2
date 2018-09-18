@@ -1,8 +1,6 @@
-#!/usr/bin/env python3
 """
-Documentation
-
-See also https://www.python-boilerplate.com/flask
+Used to create the app factory.
+It has only one function defined **create_app** used to initialize a Flask instance with parameters.
 """
 
 
@@ -12,20 +10,31 @@ from logzero import logger
 
 
 def create_app(config_filename="development.cfg"):
+    '''This is the main factory to create Flask app instances.
+    
+    Args:
+        config_filename (str): The name of the configuration file to be used to instantiate the Flask app. The
+            default is **development.cfg** which will run with **DEBUG = True** and on a development DB
+
+
+    Returns:
+        An app instance.
     '''
-    This is the main factory to create Flask app instances
-    '''
+
+    # doc--main.py app config
     app = Flask(__name__, instance_relative_config=True)
 
-    # See http://flask.pocoo.org/docs/latest/config/
     app.config.from_pyfile(config_filename)
+    # enddoc--main.py app config
 
     # Setup cors headers to allow all domains
     # https://flask-cors.readthedocs.io/en/latest/
     CORS(app)
 
+    # doc--main.py late blueprint import
     from app.routes import main
     app.register_blueprint(main)
+    # enddoc--main.py late blueprint import
 
 
     return app
