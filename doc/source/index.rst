@@ -22,6 +22,7 @@ Viator2 is an application that will help the user do the following:
 * Search for a location for interesting places to visit
 * Create an itinerary based on the selected places to visit and the parameters selected (ex: time available to visit, pace of visit etc.)
 
+.. todo:: 
 
 Indices and tables
 ==================

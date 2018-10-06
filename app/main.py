@@ -7,7 +7,10 @@ It has only one function defined **create_app** used to initialize a Flask insta
 from flask import Flask, jsonify
 from flask_cors import CORS
 from logzero import logger
+from flask_sqlalchemy import SQLAlchemy
+from flask_user import UserManager
 
+db = SQLAlchemy()
 
 def create_app(config_filename="development.cfg"):
     '''This is the main factory to create Flask app instances.
@@ -26,14 +29,17 @@ def create_app(config_filename="development.cfg"):
 
     app.config.from_pyfile(config_filename)
     # enddoc--main.py app config
+    db.init_app(app)
 
+    from app.models import User
+    user_manager = UserManager(app, db, User)
     # Setup cors headers to allow all domains
     # https://flask-cors.readthedocs.io/en/latest/
     CORS(app)
 
     # doc--main.py late blueprint import
-    from app.routes import main
-    app.register_blueprint(main)
+    from app.routes import index
+    app.register_blueprint(index)
     # enddoc--main.py late blueprint import
 
 
