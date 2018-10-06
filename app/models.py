@@ -1,6 +1,10 @@
 from app.main import db
 from flask_user import UserMixin
-
+# import geojson
+from geoalchemy2 import Geography, Geometry, WKTElement
+# from geojson import Feature, FeatureCollection, Point
+# from jsonschema import validate
+from sqlalchemy import Column
 
 class User(db.Model, UserMixin):
         __tablename__ = 'users'
@@ -16,3 +20,16 @@ class User(db.Model, UserMixin):
         # User information
         first_name = db.Column(db.String(100), nullable=False, server_default='')
         last_name = db.Column(db.String(100), nullable=False, server_default='')
+
+
+class Attractions(db.Model):
+
+    __bind_key__ = None
+    
+    id = db.Column(db.Integer, primary_key=True)
+    osm_id = db.Column(db.BigInteger)
+    osm_type = db.Column(db.Text)
+    name = db.Column(db.Text)
+    description = db.Column(db.Text)
+    attraction_type = db.Column(db.Text)
+    centroid = db.Column(Geometry('POINT'))
