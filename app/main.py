@@ -9,8 +9,10 @@ from flask_cors import CORS
 from logzero import logger
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import UserManager
+from flask_marshmallow import Marshmallow
 
 db = SQLAlchemy()
+ma = Marshmallow()
 
 def create_app(config_filename="development.cfg"):
     '''This is the main factory to create Flask app instances.
@@ -36,12 +38,19 @@ def create_app(config_filename="development.cfg"):
     # Setup cors headers to allow all domains
     # https://flask-cors.readthedocs.io/en/latest/
     CORS(app)
+    ma.init_app(app)
 
     # doc--main.py late blueprint import
     from app.routes import index
     app.register_blueprint(index)
     # enddoc--main.py late blueprint import
 
+    from app.api.resources import api_bp
+    app.register_blueprint(api_bp)
+
+    from app.api.resources import api,POIList, POIItem
+    api.add_resource(POIList, '/poi','/poi/', endpoint="poi_list")
+    api.add_resource(POIItem, '/poi/<int:id>', endpoint="poi")
 
     return app
 
