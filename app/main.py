@@ -49,7 +49,7 @@ def create_app(config_filename="development.cfg"):
     app.register_blueprint(api_bp)
 
     from app.api.resources import api,POIList, POIItem
-    api.add_resource(POIList, '/poi','/poi/', endpoint="poi_list")
+    api.add_resource(POIList, '/poi/<string:attraction>/<int:page>/<int:per_page>', endpoint="poi_list")
     api.add_resource(POIItem, '/poi/<int:id>', endpoint="poi")
 
     return app

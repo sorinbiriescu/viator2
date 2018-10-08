@@ -40,25 +40,34 @@ class POISchema(ma.Schema):
         }
 
 class POIListSchema(ma.Schema):
-    results = []
+    class Meta:
+        fields = ("total", "pages", "page", "items")
 
-    @pre_dump(pass_many=True)
-    def serialize_poi(self, data, many):
-        for poi in data:
+    @pre_dump(pass_many=False)
+    def serialize_poi(self, data):
+        self.results = []
+        self.total = data.total
+        self.pages = data.pages
+        self.page = data.page
+        for poi in data.items:
             serialized_poi = POISchema().dump(poi).data
             self.results.append(serialized_poi)
 
     @post_dump(pass_many=False)
     def wrap(self, data):
+        print(data)
         return {
-            "type": "FeatureCollection",
-            "features": [poi for poi in self.results]
+            "total_results": self.total,
+            "total_pages": self.pages,
+            "current_page": self.page,
+            "results" : {
+                "type": "FeatureCollection",
+                "features": [poi for poi in self.results]
+            }
         }
     
 def get_POI_or_404(id):
-    poi = Attractions.query \
-            .filter_by(id=id) \
-            .first()
+    poi = Attractions.query.filter_by(id=id).first()
 
     if poi is None:
         abort(HTTP_404_NOT_FOUND, message="POI id:{} doesn't exist".format(id))
@@ -66,24 +75,19 @@ def get_POI_or_404(id):
         return poi
 
 class POIList(Resource):
-    # @marshal_with(results)
-    def get(self):
-        query = Attractions.query.limit(20).all()
- 
-        poi_list = {
-            "total_results": 5,
-            "total_pages": 5,
-            "current_page": 5,
-            "features" : [poi for poi in query]
-        }
-        
+    def get(self, attraction, page, per_page):
+        query = Attractions.query \
+            .filter(Attractions.attraction_type == attraction) \
+            .paginate(page=page, per_page=per_page)
         result = POIListSchema().dump(query).data
+
         return result, HTTP_200_OK
 
 class POIItem(Resource):
     def get(self, id):
         poi = get_POI_or_404(id)
         result = POISchema().dump(poi).data
+
         return result, HTTP_200_OK
 
 

@@ -1,9 +1,6 @@
 from app.main import db
 from flask_user import UserMixin
-# import geojson
 from geoalchemy2 import Geography, Geometry, WKTElement
-# from geojson import Feature, FeatureCollection, Point
-# from jsonschema import validate
 from sqlalchemy import Column
 
 class User(db.Model, UserMixin):
