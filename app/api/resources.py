@@ -23,7 +23,6 @@ class POISchema(ma.Schema):
         lat_long = mapping(Point(point_wkb.y, point_wkb.x))
         return lat_long
 
-
     @post_dump(pass_many=False)
     def wrap(self, data):
         return { 
@@ -39,40 +38,25 @@ class POISchema(ma.Schema):
             "geometry": data["lat_long"]
         }
 
+
 class POIListSchema(ma.Schema):
     class Meta:
         fields = ("total", "pages", "page", "items")
 
-    @pre_dump(pass_many=False)
-    def serialize_poi(self, data):
-        self.results = []
-        self.total = data.total
-        self.pages = data.pages
-        self.page = data.page
-        for poi in data.items:
-            serialized_poi = POISchema().dump(poi).data
-            self.results.append(serialized_poi)
+    items = ma.Nested(POISchema, many=True)
 
     @post_dump(pass_many=False)
     def wrap(self, data):
-        print(data)
         return {
-            "total_results": self.total,
-            "total_pages": self.pages,
-            "current_page": self.page,
+            "total_results": data["total"],
+            "total_pages": data["pages"],
+            "current_page": data["page"],
             "results" : {
                 "type": "FeatureCollection",
-                "features": [poi for poi in self.results]
+                "features": data["items"]
             }
         }
     
-def get_POI_or_404(id):
-    poi = Attractions.query.filter_by(id=id).first()
-
-    if poi is None:
-        abort(HTTP_404_NOT_FOUND, message="POI id:{} doesn't exist".format(id))
-    else:
-        return poi
 
 class POIList(Resource):
     def get(self, attraction, page, per_page):
@@ -83,11 +67,17 @@ class POIList(Resource):
 
         return result, HTTP_200_OK
 
-class POIItem(Resource):
-    def get(self, id):
-        poi = get_POI_or_404(id)
-        result = POISchema().dump(poi).data
 
-        return result, HTTP_200_OK
+class POIItem(Resource):
+
+    def get(self, id):
+        poi = Attractions.query.filter_by(id=id).first()
+
+        if poi is None:
+            abort(HTTP_404_NOT_FOUND, message="POI id:{} doesn't exist".format(id))
+        else:
+            result = POISchema().dump(poi).data
+            return result, HTTP_200_OK
+        
 
 
