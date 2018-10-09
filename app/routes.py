@@ -2,7 +2,7 @@
 # Definition of the routes. Put them into their own file. See also
 # Flask Blueprints: http://flask.pocoo.org/docs/latest/blueprints
 
-from flask import Blueprint, render_template_string
+from flask import Blueprint, render_template_string, render_template
 from logzero import logger
 from flask_user import login_required
 
@@ -11,7 +11,12 @@ index = Blueprint("index", __name__)
 @index.route("/")
 def hello_world():
     logger.info("/")
-    return "Hello World"
+    return render_template("index.html")
+
+@index.route("/foundation-examples")
+def foundation_examples():
+    logger.info("/foundation-examples")
+    return render_template("foundation-examples.html")
 
 @index.route("/home")
 def home_page():
