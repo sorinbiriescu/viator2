@@ -3,6 +3,7 @@ let token = 'pk.eyJ1Ijoic29yaW5iaXJpZXNjdSIsImEiOiJjam4yM2Z6cGcyMHN2M3FxbHZ3cmJ3
 let map;
 let POI_layer;
 let user_location_layer
+const url = `https://sorinbiriescu.pythonanywhere.com/poi/`
 
 let results_obj = {
     _results: "",
@@ -164,8 +165,7 @@ function show_markers_on_map(geojson) {
 
 // function get results
 function get_results(amenity_type, page, per_page, user_coords_lat, user_coords_long) {
-    const url = `https://localhost:8000/poi/`
-
+    
     const req_params = {
         "amenity": amenity_type,
         "page": page,

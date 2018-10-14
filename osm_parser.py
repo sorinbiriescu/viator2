@@ -176,10 +176,10 @@ if __name__ == "__main__":
     pbf_file = os.path.join("C:\\","Users","Sorin","Documents","Projects","OSM DB","france.osm.pbf")
     print(pbf_file)
 
-    app = create_app()
+    app = create_app(config_filename="pythonanywhere.cfg")
 
     with app.app_context():
 
-    # CitiesRegionsHandler().apply_file(pbf_file)
+    #CitiesRegionsHandler().apply_file(pbf_file)
     #TourismListHandler().apply_file(pbf_file)
         AmenityListHandler().apply_file(pbf_file)
