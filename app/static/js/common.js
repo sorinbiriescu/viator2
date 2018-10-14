@@ -35,6 +35,13 @@ let userLocationObj = {
       showUserLocation(this._location_latitude, this._location_longitude, this._update_map_view)
       this._update_map_view = false
     }
+    // console.log(this._location_latitude, this._location_longitude, this._update_map_view)
+  },
+
+  voidLocation: function () {
+    this._location_latitude = null
+    this._location_longitude = null
+    this._location_accuracy = null
   }
 }
 
@@ -64,7 +71,7 @@ let parameters = {
 
 let watchLocationOptions = {
   enableHighAccuracy: false,
-  timeout: 5000,
+  timeout: 10000,
   maximumAge: 0
 }
 
@@ -134,7 +141,7 @@ function setNull (target) {
 
 function setUserLocationManually (e) {
   event.stopPropagation()
-  setNull(userLocationObj)
+  userLocationObj.voidLocation()
 
   if (watchLocationID) {
     navigator.geolocation.clearWatch(watchLocationID)
@@ -149,8 +156,7 @@ function setUserLocationManually (e) {
 };
 
 function getUserLocation (position) {
-  setNull(userLocationObj)
-  console.log(position)
+  userLocationObj.voidLocation()
 
   userLocationObj.set('location_latitude', position.coords.latitude)
   userLocationObj.set('location_longitude', position.coords.longitude)
