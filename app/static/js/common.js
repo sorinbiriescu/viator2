@@ -73,11 +73,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
             //control position - allowed: 'topleft', 'topright', 'bottomleft', 'bottomright'
         },
 
-        onAdd: function (map) {
+        onAdd: function () {
             var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-            container.style.backgroundColor = 'white';
-            container.style.width = '40px';
-            container.style.height = '40px';
+            // container.style.backgroundColor = 'white';
+            container.style.width = '100px';
+            container.style.height = '58px';
+            container.innerHTML = '<p class="button text-center align-middle"> My location </p>'
             container.onclick = function () {
                 get_user_location();
             }
