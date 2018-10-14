@@ -71,7 +71,7 @@ let parameters = {
 
 let watchLocationOptions = {
   enableHighAccuracy: false,
-  timeout: 10000,
+  timeout: 3000,
   maximumAge: 0
 }
 
@@ -101,6 +101,10 @@ document.addEventListener('DOMContentLoaded', function (event) {
     this._div.onclick = function () {
     //   getUserLocation()
       setNull(userLocationObj)
+      if (watchLocationID) {
+        navigator.geolocation.clearWatch(watchLocationID)
+        watchLocationID = null
+      }
       userLocationObj.set('update_map_view', true)
       watchLocationID = navigator.geolocation.watchPosition(getUserLocation, watchLocationErrors, watchLocationOptions)
     }
@@ -189,7 +193,7 @@ function showUserLocation (lat, lng, updateView) {
 
   addMarkerToMap(userCoords, '#D35400')
   if (updateView === true) {
-    map.setView(userCoords, 16)
+    map.flyTo(userCoords, 18)
   }
 };
 
