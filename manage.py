@@ -13,5 +13,5 @@ def drop_db():
         db.drop_all()
 
 if __name__ == "__main__":
-    # drop_db()
+    drop_db()
     create_db()

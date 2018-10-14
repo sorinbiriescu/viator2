@@ -3,7 +3,8 @@ from flask_restful import Api, Resource, url_for, reqparse, abort
 from app.models import Attractions
 from app.main import db, ma
 from app.api.status import HTTP_404_NOT_FOUND, HTTP_200_OK
-from sqlalchemy import func
+from sqlalchemy import func, desc, asc, cast
+from geoalchemy2 import Geography
 from shapely import wkb
 from shapely.geometry import Point, mapping
 from marshmallow import post_dump, pre_dump
@@ -59,10 +60,30 @@ class POIListSchema(ma.Schema):
     
 
 class POIList(Resource):
-    def get(self, attraction, page, per_page):
+    def post(self):
+
+        parser = reqparse.RequestParser()
+        parser.add_argument('amenity', type=str, required = True, help='Rate to charge for this resource', location="json")
+        parser.add_argument('page', type=int, required = True, help='Rate to charge for this resource', location="json")
+        parser.add_argument('per_page', type=int, required = True, help='Rate to charge for this resource', location="json")
+        parser.add_argument('user_coords_lat', type=float, required = True, help='Rate to charge for this resource', location="json")
+        parser.add_argument('user_coords_long', type=float, required = True, help='Rate to charge for this resource', location="json")
+        args = parser.parse_args()
+        
         query = Attractions.query \
-            .filter(Attractions.attraction_type == attraction) \
-            .paginate(page=page, per_page=per_page)
+            .filter(Attractions.attraction_type == args["amenity"]) \
+            .order_by(
+                func.ST_Distance(
+                    Attractions.centroid
+                    ,
+                    func.St_MakePoint(
+                        args["user_coords_lat"],
+                        args["user_coords_long"]
+                    )
+                )
+            ) \
+            .paginate(page=args["page"], per_page=args["per_page"])
+
         result = POIListSchema().dump(query).data
 
         return result, HTTP_200_OK

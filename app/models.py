@@ -30,4 +30,4 @@ class Attractions(db.Model):
     name = db.Column(db.Text)
     description = db.Column(db.Text)
     attraction_type = db.Column(db.Text)
-    centroid = db.Column(Geometry('POINT'))
+    centroid = db.Column(Geography(geometry_type='POINT', srid=4326))

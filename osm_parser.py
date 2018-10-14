@@ -107,23 +107,23 @@ class AmenityListHandler(o.SimpleHandler):
         else:
             pass
 
-    def way(self, w):
-        if 'amenity' in w.tags and w.tags.get('amenity') in self.amenity_list:
-            wkb = wkbfab.create_multipolygon(w)
-            poly = wkblib.loads(wkb, hex=True)
-            centroid = poly.representative_point()
-            self.submit_location(w.id, w.tags, centroid.x, centroid.y, 'way')
-        else:
-            pass
+    # def way(self, w):
+    #     if 'amenity' in w.tags and w.tags.get('amenity') in self.amenity_list:
+    #         wkb = wkbfab.create_multipolygon(w)
+    #         poly = wkblib.loads(wkb, hex=True)
+    #         centroid = poly.representative_point()
+    #         self.submit_location(w.id, w.tags, centroid.x, centroid.y, 'way')
+    #     else:
+    #         pass
 
-    def area(self, a):
-        if 'amenity' in a.tags and a.tags.get('amenity') in self.amenity_list:
-            wkb = wkbfab.create_multipolygon(a)
-            poly = wkblib.loads(wkb, hex=True)
-            centroid = poly.representative_point()
-            self.submit_location(a.id, a.tags, centroid.x, centroid.y,'area')
-        else:
-            pass
+    # def area(self, a):
+    #     if 'amenity' in a.tags and a.tags.get('amenity') in self.amenity_list:
+    #         wkb = wkbfab.create_multipolygon(a)
+    #         poly = wkblib.loads(wkb, hex=True)
+    #         centroid = poly.representative_point()
+    #         self.submit_location(a.id, a.tags, centroid.x, centroid.y,'area')
+    #     else:
+    #         pass
 
 
 
