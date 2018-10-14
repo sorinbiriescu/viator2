@@ -1,7 +1,7 @@
 from app.main import db, create_app
 
 def create_db():
-    app = create_app()
+    app = create_app(config_filename="development.cfg")
 
     with app.app_context():
         db.create_all()

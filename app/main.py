@@ -14,7 +14,7 @@ from flask_marshmallow import Marshmallow
 db = SQLAlchemy()
 ma = Marshmallow()
 
-def create_app(config_filename="development.cfg"):
+def create_app(config_filename):
     '''This is the main factory to create Flask app instances.
     
     Args:
