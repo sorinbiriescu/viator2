@@ -33,6 +33,7 @@ let userLocationObj = {
 
     if (!hasNull(userLocationObj)) {
       showUserLocation(this._location_latitude, this._location_longitude, this._update_map_view)
+      this._update_map_view = false
     }
   }
 }
@@ -92,6 +93,8 @@ document.addEventListener('DOMContentLoaded', function (event) {
     this._div.innerHTML = '<i class="fas fa-map-pin"></i>'
     this._div.onclick = function () {
     //   getUserLocation()
+      setNull(userLocationObj)
+      userLocationObj.set('update_map_view', true)
       watchLocationID = navigator.geolocation.watchPosition(getUserLocation, watchLocationErrors, watchLocationOptions)
     }
     return this._div
@@ -149,7 +152,6 @@ function getUserLocation (position) {
   setNull(userLocationObj)
   console.log(position)
 
-  userLocationObj.set('update_map_view', true)
   userLocationObj.set('location_latitude', position.coords.latitude)
   userLocationObj.set('location_longitude', position.coords.longitude)
   userLocationObj.set('location_accuracy', position.coords.accuracy)
