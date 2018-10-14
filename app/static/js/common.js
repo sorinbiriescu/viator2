@@ -15,7 +15,6 @@ let results_obj = {
     set: function (name, value) {
         this["_" + name] = value;
         show_markers_on_map(this._results.results)
-        console.log(this._results)
     }
 };
 
@@ -88,12 +87,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     map.addControl(new ourCustomControl());
 
-    const toilets_button = document.getElementById("toilets-div");
+    const toilets_button = document.getElementById("toilets-btn");
     toilets_button.addEventListener("click", function () {
         parameters.set("amenity", this.getAttribute('amenity'))
     });
 
-    const drinking_water_button = document.getElementById("drinking-water-div");
+    const drinking_water_button = document.getElementById("drinking-water-btn");
     drinking_water_button.addEventListener("click", function () {
         parameters.set("amenity", this.getAttribute('amenity'))
     });
@@ -117,7 +116,6 @@ function get_user_location() {
             user_location.set("location_latitude", position.coords.latitude)
             user_location.set("location_longitude", position.coords.longitude)
             user_location.set("location_accuracy", position.coords.accuracy)
-            console.log(position.coords.latitude, position.coords.longitude, position.coords);
         });
     } else {
         console.log("Geolocation is not supported by this browser.");
@@ -127,7 +125,6 @@ function get_user_location() {
 
 function show_user_location(lat, lng) {
     const user_location = L.latLng(lat, lng)
-    console.log(user_location)
 
     if (map.hasLayer(user_location_layer)) {
         map.removeLayer(user_location_layer)
