@@ -10,13 +10,16 @@
     <link rel="stylesheet" href="../static/css/app.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" rel="stylesheet">
 
-    <script src="../static/js/common.js"></script>
+    <!-- <script src="../static/js/common.js"></script> -->
+    <script src="../static/js/common-pure.js"></script>
 
     <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.43.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.43.0/mapbox-gl.css' rel='stylesheet' />
     <script src="https://rawgit.com/mapbox/mapbox-gl-leaflet/master/leaflet-mapbox-gl.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
+
 </head>
 
 <body>
@@ -26,8 +29,12 @@
             </div>
             <div class="cell shrink">
                 <div class="grid-x grid-margin-x">
-                    <div class="cell small-6 text-center" id="toilets-div" amenity="toilets"> TOILETS </div>
-                    <div class="cell small-6 text-center" id="drinking-water-div" amenity="drinking_water"> WATER </div>
+                    <div class="cell small-6 text-center">
+                        <button type="button" class="button" id="toilets-btn" amenity="toilets">Toilets</button>
+                    </div>
+                    <div class="cell small-6 text-center">
+                        <button type="button" class="button" id="drinking-water-btn" amenity="drinking_water">Drinking Water</button>
+                    </div>
                 </div>
             </div>
         </div>
