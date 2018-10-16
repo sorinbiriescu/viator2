@@ -36,7 +36,6 @@ MarkupSafe==1.0
 marshmallow==2.15.6
 marshmallow-sqlalchemy==0.14.1
 mccabe==0.6.1
-osmium==2.14.3
 packaging==17.1
 passlib==1.7.1
 psycopg2==2.7.5
