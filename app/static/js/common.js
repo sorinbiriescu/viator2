@@ -32,10 +32,21 @@ let userLocationObj = {
     this['_' + parameter] = value
 
     if (!hasNull(userLocationObj)) {
-      showUserLocation(this._location_latitude, this._location_longitude, this._update_map_view)
+      this.showLocation()
       this._update_map_view = false
     }
     // console.log(this._location_latitude, this._location_longitude, this._update_map_view)
+  },
+
+  showLocation: function () {
+    removeLayer(map, userLocationLayer)
+    const userLatLng = L.latLng(this._location_latitude, this._location_longitude)
+    const markerIcon = createCustomMarkerIcon('#D35400')
+    userLocationLayer = createMarker(userLatLng, markerIcon)
+    userLocationLayer.addTo(map)
+    if (this._update_map_view === true) {
+      map.flyTo(userLatLng, 18)
+    }
   },
 
   voidLocation: function () {
@@ -95,26 +106,30 @@ document.addEventListener('DOMContentLoaded', function (event) {
     // control position - allowed: 'topleft', 'topright', 'bottomleft', 'bottomright'
   }
 
-  userPositionMapBtn.onAdd = function (map) {
+  // Change the behaviour of the double click on the map
+  map.addEventListener('dblclick', setUserLocationManually)
+
+  userPositionMapBtn.onAdd = function () {
     this._div = L.DomUtil.create('button', 'leaflet-bar leaflet-control leaflet-control-custom button')
     this._div.innerHTML = '<i class="fas fa-map-pin"></i>'
-    this._div.onclick = function () {
-    //   getUserLocation()
-      setNull(userLocationObj)
+    this._div.addEventListener('pointerup', function () {
+      event.stopPropagation()
+      userLocationObj.voidLocation()
       if (watchLocationID) {
         navigator.geolocation.clearWatch(watchLocationID)
         watchLocationID = null
       }
       userLocationObj.set('update_map_view', true)
       watchLocationID = navigator.geolocation.watchPosition(getUserLocation, watchLocationErrors, watchLocationOptions)
-    }
+    })
+    this._div.addEventListener('pointerdown', function () {
+      event.stopPropagation()
+      console.log('triggered')
+    })
     return this._div
   }
 
   userPositionMapBtn.addTo(map)
-
-  // Change the behaviour of the double click on the map
-  map.addEventListener('dblclick', setUserLocationManually)
 
   const toiletsBtn = document.getElementById('toilets-btn')
   toiletsBtn.addEventListener('click', function () {
@@ -127,6 +142,13 @@ document.addEventListener('DOMContentLoaded', function (event) {
   })
 })
 
+/**
+ * *** Pure function ***
+ * Check if any of an object's properties is null. Used to check, for examples,
+ * if the user's location object has all the coordinates
+ * @param {Object} target - The object to check for null values
+ * @return {boolean} - returns true or false
+ */
 function hasNull (target) {
   for (var member in target) {
     if (target[member] === null) { return true }
@@ -134,17 +156,23 @@ function hasNull (target) {
   return false
 };
 
-function setNull (target) {
-  for (var member in target) {
-    if (typeof target[member] !== 'function') {
-      target[member] = null
-    }
-  }
-  return true
-};
+// /**
+//  * *** Pure function ***
+//  * Sets an object's properties to null. Used to set, for example, the user's
+//  * location object to null so its update functions don't trigger
+//  * @param {Object} target - The object to check for null values
+//  * @return {boolean} - returns true or false
+//  */
+// function setNull (target) {
+//   for (var member in target) {
+//     if (typeof target[member] !== 'function') {
+//       target[member] = null
+//     }
+//   }
+//   return true
+// };
 
 function setUserLocationManually (e) {
-  event.stopPropagation()
   userLocationObj.voidLocation()
 
   if (watchLocationID) {
@@ -167,6 +195,11 @@ function getUserLocation (position) {
   userLocationObj.set('location_accuracy', position.coords.accuracy)
 };
 
+/**
+ * *** Pure function ***
+ * Returns to the console a message depending on the error code
+ * @param {Object} error - The object to check for null values
+ */
 function watchLocationErrors (error) {
   switch (error.code) {
     case error.PERMISSION_DENIED:
@@ -184,26 +217,20 @@ function watchLocationErrors (error) {
   }
 }
 
-function showUserLocation (lat, lng, updateView) {
-  const userCoords = L.latLng(lat, lng)
-
-  if (map.hasLayer(userLocationLayer)) {
-    map.removeLayer(userLocationLayer)
+function removeLayer (mapObject, layerName) {
+  if (mapObject.hasLayer(layerName)) {
+    mapObject.removeLayer(layerName)
   }
+}
 
-  addMarkerToMap(userCoords, '#D35400')
-  if (updateView === true) {
-    map.flyTo(userCoords, 18)
-  }
+function createMarker (latlng, markerIcon) {
+  const marker =  L.marker(latlng, {
+    icon: markerIcon })
+
+  return marker
 };
 
-function addMarkerToMap (latlng, color) {
-  userLocationLayer = L.marker(latlng, {
-    icon: createCustomMarker(color)
-  }).addTo(map)
-};
-
-function createCustomMarker (color) {
+function createCustomMarkerIcon (color) {
   const markerHtmlStyles = `
 
         width: 3rem;
