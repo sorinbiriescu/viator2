@@ -1,9 +1,12 @@
 'use strict'
+import whatInput from './static/js/vendor/what-input.js';
+
 let token = 'pk.eyJ1Ijoic29yaW5iaXJpZXNjdSIsImEiOiJjam4yM2Z6cGcyMHN2M3FxbHZ3cmJ3N3RwIn0.UJ3jRN4-4yictRsdXBMhWQ'
 let map
 let userLocationLayer
 let watchID
 let userPositionMapBtn
+let zoomToLocation
 
 const appState = {
     userLocation: {
@@ -11,7 +14,6 @@ const appState = {
         longitude: "",
         accuracy: ""
     },
-    updateMapView: true,
     watchLocationOptions: {
         enableHighAccuracy: false,
         timeout: 3000,
@@ -36,6 +38,9 @@ document.addEventListener('DOMContentLoaded', function (event) {
     })
     gl.addTo(map)
 
+    map.doubleClickZoom.disable()
+
+
     // Change the behaviour of the double click on the map
     // map.addEventListener('dblclick', setUserLocationManually)
 
@@ -50,6 +55,8 @@ document.addEventListener('DOMContentLoaded', function (event) {
     // })
 
     function app(state) {
+        console.log(state)
+        input = whatInput.ask()
         view(dispatch, state)
 
         function dispatch(action) {
@@ -62,10 +69,25 @@ document.addEventListener('DOMContentLoaded', function (event) {
 
 });
 
+function view(dispatch, state) {
+    showUserLocation(state)
+    // showResultsOnMap(state)
+    addLocationBtn(dispatch)
+
+    map.removeEventListener('dblclick dbltap')
+
+    map.addEventListener('dblclick dbltap', function(position) {
+        dispatch(updateUserLocationManually(position))
+    })
+}
+
 // reducer
 function updateState(state, action) {
     switch (action.type) {
         case 'SET_USER_LOCATION_WATCH':
+            console.log(zoomToLocation)
+            zoomToLocation = true
+            console.log(zoomToLocation)
             removeLocationWatch()
             addLocationWatch(action.payload, state)
             return state
@@ -83,17 +105,23 @@ function updateState(state, action) {
                 ...appState
             };
 
+            case 'UPDATE_USER_LOCATION_MANUALLY':
+            zoomToLocation = true
+            return {
+                ...appState,
+                userLocation: {
+                    latitude: action.payload.latlng.lat,
+                    longitude: action.payload.latlng.lng,
+                    accuracy: 1
+                }
+            };
+            return {
+                ...appState
+            };
+
         default:
             return state;
     }
-}
-
-
-function view(dispatch, state) {
-    showUserLocation(state)
-    // showResultsOnMap(state)
-    addLocationBtn(dispatch)
-
 }
 
 
@@ -104,12 +132,21 @@ function addWatch(payload) {
     };
 }
 
+
 function updateUserLocation(coords) {
     return {
         type: 'UPDATE_USER_LOCATION',
         payload: coords
     };
 }
+
+function updateUserLocationManually(coords) {
+    return {
+        type: 'UPDATE_USER_LOCATION_MANUALLY',
+        payload: coords
+    };
+}
+
 
 function addLocationBtn(dispatch) {
     if (userPositionMapBtn) {
@@ -135,8 +172,8 @@ function addLocationBtn(dispatch) {
 
 }
 
+
 function showUserLocation(state) {
-    console.log(state)
 
     if (map.hasLayer(userLocationLayer)) {
         map.removeLayer(userLocationLayer)
@@ -145,8 +182,13 @@ function showUserLocation(state) {
     if (state.userLocation.latitude && state.userLocation.longitude) {
         const userCoords = L.latLng(state.userLocation.latitude, state.userLocation.longitude)
         userLocationLayer = L.marker(userCoords).addTo(map)
-    }
 
+        if (zoomToLocation === true) {
+            map.flyTo(userCoords, 18)
+        }
+
+        zoomToLocation = false
+    }
 }
 
 
@@ -155,12 +197,14 @@ function addLocationWatch(dispatch, state) {
     watchID = navigator.geolocation.watchPosition(e => dispatch(updateUserLocation(e)), updateUserLocation, state.watchLocationOptions)
 };
 
+
 function removeLocationWatch() {
     if (watchID) {
         navigator.geolocation.clearWatch(watchID)
     }
 
 }
+
 
 function watchLocationErrors(error) {
     switch (error.code) {
