@@ -1,5 +1,4 @@
 'use strict'
-import whatInput from './static/js/vendor/what-input.js';
 
 let token = 'pk.eyJ1Ijoic29yaW5iaXJpZXNjdSIsImEiOiJjam4yM2Z6cGcyMHN2M3FxbHZ3cmJ3N3RwIn0.UJ3jRN4-4yictRsdXBMhWQ'
 let map
@@ -7,6 +6,7 @@ let userLocationLayer
 let watchID
 let userPositionMapBtn
 let zoomToLocation
+
 
 const appState = {
     userLocation: {
@@ -29,8 +29,13 @@ const appState = {
 
 
 document.addEventListener('DOMContentLoaded', function (event) {
-    map = L.map('mapbox')
-    map.setView([45.764, 4.8357], 12)
+    map = L.map('mapbox', {
+        center: [45.764, 4.8357],
+        zoom: 12,
+        tap: true,
+        touchZoom: true
+    })
+    // map.setView([45.764, 4.8357], 12)
 
     let gl = L.mapboxGL({
         accessToken: token,
@@ -39,10 +44,6 @@ document.addEventListener('DOMContentLoaded', function (event) {
     gl.addTo(map)
 
     map.doubleClickZoom.disable()
-
-
-    // Change the behaviour of the double click on the map
-    // map.addEventListener('dblclick', setUserLocationManually)
 
     // const toiletsBtn = document.getElementById('toilets-btn')
     // toiletsBtn.addEventListener('click', function () {
@@ -56,7 +57,6 @@ document.addEventListener('DOMContentLoaded', function (event) {
 
     function app(state) {
         console.log(state)
-        input = whatInput.ask()
         view(dispatch, state)
 
         function dispatch(action) {
@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
     }
 
     app(appState);
+    console.log(map)
 
 });
 
@@ -74,11 +75,27 @@ function view(dispatch, state) {
     // showResultsOnMap(state)
     addLocationBtn(dispatch)
 
-    map.removeEventListener('dblclick dbltap')
+    let timer
+    // let start_action = ["mousedown", "touchstart", "dblclick", "pointerdown"]
+    // start_action.map(function (evt) {
+    //     map.addEventListener(evt, function (e) {
+    //         console.log("touch start")
+    //         clearTimeout(timer);
+    //         timer = setTimeout(function () {
+    //             dispatch(updateUserLocationManually(e))
+    //         }, 1000)
 
-    map.addEventListener('dblclick dbltap', function(position) {
-        dispatch(updateUserLocationManually(position))
-    })
+    //     })
+    // })
+
+    // let stop_action = ["mouseup", "mouseleave", "touchend", "touchleave", "pointermove", "pointerup"]
+    // stop_action.map(function (evt) {
+    //     map.addEventListener(evt, function (e) {
+    //         clearTimeout(timer)
+    //     })
+    // })
+    map.addEventListener('contextmenu', e => dispatch(updateUserLocationManually(e)))
+
 }
 
 // reducer
@@ -101,11 +118,8 @@ function updateState(state, action) {
                     accuracy: action.payload.coords.accuracy
                 }
             };
-            return {
-                ...appState
-            };
 
-            case 'UPDATE_USER_LOCATION_MANUALLY':
+        case 'UPDATE_USER_LOCATION_MANUALLY':
             zoomToLocation = true
             return {
                 ...appState,
@@ -115,14 +129,12 @@ function updateState(state, action) {
                     accuracy: 1
                 }
             };
-            return {
-                ...appState
-            };
 
         default:
             return state;
     }
 }
+
 
 
 function addWatch(payload) {
