@@ -4,9 +4,14 @@ let token = 'pk.eyJ1Ijoic29yaW5iaXJpZXNjdSIsImEiOiJjam4yM2Z6cGcyMHN2M3FxbHZ3cmJ3
 let map
 let userLocationLayer
 let watchID
-let userPositionMapBtn
+// let userPositionMapBtn
 let zoomToLocation
 
+import {
+    initMap,
+    removeLayer,
+    addLocationBtn
+} from "./map.js";
 
 const appState = {
     userLocation: {
@@ -29,21 +34,6 @@ const appState = {
 
 
 document.addEventListener('DOMContentLoaded', function (event) {
-    map = L.map('mapbox', {
-        center: [45.764, 4.8357],
-        zoom: 12,
-        tap: true,
-        touchZoom: true
-    })
-    // map.setView([45.764, 4.8357], 12)
-
-    let gl = L.mapboxGL({
-        accessToken: token,
-        style: 'mapbox://styles/mapbox/streets-v9'
-    })
-    gl.addTo(map)
-
-    map.doubleClickZoom.disable()
 
     // const toiletsBtn = document.getElementById('toilets-btn')
     // toiletsBtn.addEventListener('click', function () {
@@ -55,56 +45,33 @@ document.addEventListener('DOMContentLoaded', function (event) {
     //     parameters.set('amenity', this.getAttribute('amenity'))
     // })
 
-    function app(state) {
-        console.log(state)
-        view(dispatch, state)
+    map = initMap('mapbox')
 
-        function dispatch(action) {
-            const nextState = updateState(state, action);
+    function app(state) {
+        const dispatch = (action) => {
+            const nextState = reducer(state, action);
             app(nextState);
         }
+
+        view(dispatch, state)
     }
 
     app(appState);
-    console.log(map)
 
 });
 
 function view(dispatch, state) {
     showUserLocation(state)
     // showResultsOnMap(state)
-    addLocationBtn(dispatch)
-
-    let timer
-    // let start_action = ["mousedown", "touchstart", "dblclick", "pointerdown"]
-    // start_action.map(function (evt) {
-    //     map.addEventListener(evt, function (e) {
-    //         console.log("touch start")
-    //         clearTimeout(timer);
-    //         timer = setTimeout(function () {
-    //             dispatch(updateUserLocationManually(e))
-    //         }, 1000)
-
-    //     })
-    // })
-
-    // let stop_action = ["mouseup", "mouseleave", "touchend", "touchleave", "pointermove", "pointerup"]
-    // stop_action.map(function (evt) {
-    //     map.addEventListener(evt, function (e) {
-    //         clearTimeout(timer)
-    //     })
-    // })
-    map.addEventListener('contextmenu', e => dispatch(updateUserLocationManually(e)))
-
-}
+    addLocationBtn(map, dispatch)
+    // debugger;
+};
 
 // reducer
-function updateState(state, action) {
+function reducer(state, action) {
     switch (action.type) {
         case 'SET_USER_LOCATION_WATCH':
-            console.log(zoomToLocation)
             zoomToLocation = true
-            console.log(zoomToLocation)
             removeLocationWatch()
             addLocationWatch(action.payload, state)
             return state
@@ -133,63 +100,36 @@ function updateState(state, action) {
         default:
             return state;
     }
-}
+};
 
 
-
-function addWatch(payload) {
+export const addWatch = (payload) => {
     return {
         type: 'SET_USER_LOCATION_WATCH',
         payload: payload
-    };
-}
+    }
+};
 
 
 function updateUserLocation(coords) {
     return {
         type: 'UPDATE_USER_LOCATION',
         payload: coords
-    };
-}
+    }
+};
+
 
 function updateUserLocationManually(coords) {
     return {
         type: 'UPDATE_USER_LOCATION_MANUALLY',
         payload: coords
-    };
-}
-
-
-function addLocationBtn(dispatch) {
-    if (userPositionMapBtn) {
-        map.removeControl(userPositionMapBtn)
     }
-
-    userPositionMapBtn = L.control()
-
-    userPositionMapBtn.options = {
-        position: 'bottomright'
-        // control position - allowed: 'topleft', 'topright', 'bottomleft', 'bottomright'
-    }
-
-    userPositionMapBtn.onAdd = function () {
-        this._div = L.DomUtil.create('button', 'leaflet-bar leaflet-control leaflet-control-custom button')
-        this._div.innerHTML = '<i class="fas fa-map-pin"></i>'
-        this._div.addEventListener('click', function () {
-            dispatch(addWatch(dispatch))
-        })
-        return this._div
-    }
-    userPositionMapBtn.addTo(map)
-
-}
+};
 
 
 function showUserLocation(state) {
 
-    if (map.hasLayer(userLocationLayer)) {
-        map.removeLayer(userLocationLayer)
-    }
+    removeLayer(map, userLocationLayer)
 
     if (state.userLocation.latitude && state.userLocation.longitude) {
         const userCoords = L.latLng(state.userLocation.latitude, state.userLocation.longitude)
@@ -201,12 +141,12 @@ function showUserLocation(state) {
 
         zoomToLocation = false
     }
-}
+};
 
 
 function addLocationWatch(dispatch, state) {
     removeLocationWatch()
-    watchID = navigator.geolocation.watchPosition(e => dispatch(updateUserLocation(e)), updateUserLocation, state.watchLocationOptions)
+    watchID = navigator.geolocation.watchPosition(e => dispatch(updateUserLocation(e)), watchLocationErrors, state.watchLocationOptions)
 };
 
 
@@ -214,8 +154,7 @@ function removeLocationWatch() {
     if (watchID) {
         navigator.geolocation.clearWatch(watchID)
     }
-
-}
+};
 
 
 function watchLocationErrors(error) {
